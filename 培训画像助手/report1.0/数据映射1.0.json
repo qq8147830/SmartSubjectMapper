@@ -1,0 +1,35 @@
+{
+  "teacher": {
+    "name": "张磊",
+    "age": 9,
+    "region": "东莞市",
+    "school": "东莞市东华高级中学",
+    "subject": "英语",
+    "position": "班主任",
+    "stage": "成熟期-骨干教师",
+    "stage_value": "backbone",
+    "total_hours": 5283
+  },
+  "training": {
+    "total": 200,
+    "total_hours": 5283,
+    "level_distribution": {
+      "市级培训（市培）": 41,
+      "其它": 41,
+      "国家级培训（国培）": 49,
+      "校级培训（校培）": 36,
+      "省级培训（省培）": 33
+    },
+    "dimension_distribution": {
+      "专业知识": 23,
+      "专业能力": 120,
+      "数字素养": 26,
+      "专业理念与师德": 31
+    },
+    "yearly_hours": {
+      "2023": 1828,
+      "2024": 1773,
+      "2025": 1682
+    }
+  }
+}

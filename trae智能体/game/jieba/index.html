@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>街霸风格双人对战游戏</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="1200" height="600"></canvas>
+        
+        <div class="ui-overlay">
+            <div class="game-title">街霸风格双人对战</div>
+            
+            <div class="start-button-container">
+                <button id="startGameBtn" class="start-btn">▶️ 开始游戏</button>
+            </div>
+            
+            <div class="audio-controls" id="audioControls">
+                <h4>🎵 音效控制 <small>(按 = 键折叠)</small></h4>
+                <div class="audio-buttons">
+                    <button id="toggleAudio" class="audio-btn">🔊 音效: 开</button>
+                    <button id="toggleMusic" class="audio-btn">🎶 音乐: 关</button>
+                    <button id="toggleSfx" class="audio-btn">🔔 SFX: 开</button>
+                </div>
+                <div class="volume-controls">
+                    <label for="masterVolume">主音量:</label>
+                    <input type="range" id="masterVolume" min="0" max="100" value="80">
+                    <span id="masterVolumeValue">80%</span>
+                </div>
+                <div class="volume-controls">
+                    <label for="musicVolume">音乐音量:</label>
+                    <input type="range" id="musicVolume" min="0" max="100" value="70">
+                    <span id="musicVolumeValue">70%</span>
+                </div>
+                <div class="volume-controls">
+                    <label for="sfxVolume">音效音量:</label>
+                    <input type="range" id="sfxVolume" min="0" max="100" value="80">
+                    <span id="sfxVolumeValue">80%</span>
+                </div>
+            </div>
+            
+            <div class="health-bars">
+                <div class="health-bar player-a">
+                    <div class="health-fill" id="playerAHealth"></div>
+                    <span class="health-text">Player A</span>
+                </div>
+                <div class="timer" id="gameTimer">99</div>
+                <div class="health-bar player-b">
+                    <div class="health-fill" id="playerBHealth"></div>
+                    <span class="health-text">Player B</span>
+                </div>
+            </div>
+            
+            <div class="energy-bars">
+                <div class="energy-bar player-a">
+                    <div class="energy-fill" id="playerAEnergy"></div>
+                    <span class="energy-text">能量</span>
+                </div>
+                <div class="combo-counter" id="comboCounter">COMBO x0</div>
+                <div class="energy-bar player-b">
+                    <div class="energy-fill" id="playerBEnergy"></div>
+                    <span class="energy-text">能量</span>
+                </div>
+            </div>
+            
+            <div class="controls-info">
+                <div class="player-controls">
+                    <h4>Player A (左侧)</h4>
+                    <p>W-跳跃 A-左移 S-蹲下 D-右移</p>
+                    <p>J-轻攻 K-重攻 L-特技 I-绝招 O-超必杀</p>
+                </div>
+                <div class="player-controls">
+                    <h4>Player B (右侧)</h4>
+                    <p>↑-跳跃 ←-左移 ↓-蹲下 →-右移</p>
+                    <p>1-轻攻 2-重攻 3-特技 4-绝招 5-超必杀</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="input.js"></script>
+    <script src="fighter.js"></script>
+    <script src="battle.js"></script>
+    <script src="effects.js"></script>
+    <script src="ui.js"></script>
+    <script src="audio.js"></script>
+    <script src="game.js"></script>
+    <script src="audio-controls.js"></script>
+</body>
+</html>

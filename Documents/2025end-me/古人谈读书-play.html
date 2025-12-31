@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>古人谈读书 - 游戏式学习</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.3);
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: #ffd700;
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 4px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .content {
+            padding: 30px 20px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome-screen {
+            text-align: center;
+        }
+
+        .welcome-screen .icon {
+            font-size: 80px;
+            margin: 30px 0;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .welcome-screen h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .welcome-screen p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            margin: 10px;
+            min-width: 150px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .btn-large {
+            padding: 18px 40px;
+            font-size: 18px;
+        }
+
+        .level-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .level-card:hover {
+            transform: translateX(10px);
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .level-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .level-card.completed {
+            border-color: #4caf50;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .level-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .level-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .level-badge.completed {
+            background: #4caf50;
+        }
+
+        .level-badge.locked {
+            background: #999;
+        }
+
+        .level-description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .game-area {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .question-title {
+            font-size: 20px;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .question-text {
+            font-size: 18px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-size: 16px;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+
+        .option.correct {
+            border-color: #4caf50;
+            background: #e8f5e9;
+        }
+
+        .option.wrong {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+
+        .matching-game {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 600px) {
+            .matching-game {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .match-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .match-item:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .match-item.selected {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+
+        .match-item.matched {
+            border-color: #4caf50;
+            background: #e8f5e9;
+            opacity: 0.6;
+        }
+
+        .fill-blank {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .blank-text {
+            font-size: 18px;
+            line-height: 2;
+            margin-bottom: 20px;
+        }
+
+        .blank-input {
+            display: inline-block;
+            min-width: 100px;
+            padding: 8px 15px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            font-size: 16px;
+            margin: 0 5px;
+            text-align: center;
+        }
+
+        .blank-input.correct {
+            border-color: #4caf50;
+            background: #e8f5e9;
+        }
+
+        .blank-input.wrong {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 16px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback.correct {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #4caf50;
+        }
+
+        .feedback.wrong {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #f44336;
+        }
+
+        .stars {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .star {
+            font-size: 30px;
+            color: #ddd;
+            transition: all 0.3s ease;
+        }
+
+        .star.active {
+            color: #ffd700;
+            transform: scale(1.2);
+        }
+
+        .result-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .result-icon {
+            font-size: 100px;
+            margin: 20px 0;
+        }
+
+        .result-title {
+            font-size: 28px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .result-score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #4caf50;
+            margin: 20px 0;
+        }
+
+        .achievement {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .achievement-icon {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        .achievement-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .text-content {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            line-height: 2;
+            font-size: 16px;
+        }
+
+        .text-content h3 {
+            color: #667eea;
+            margin: 20px 0 10px 0;
+            font-size: 20px;
+        }
+
+        .text-content .quote {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-style: italic;
+            color: #555;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .back-btn {
+            background: #999;
+            margin-bottom: 20px;
+        }
+
+        .hint {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #856404;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 24px;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .question-text {
+                font-size: 16px;
+            }
+
+            .level-title {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 古人谈读书</h1>
+            <div class="subtitle">游戏式学习 - 五年级语文</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="starsCount">0</div>
+                    <div>⭐ 星星</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="scoreCount">0</div>
+                    <div>🎯 得分</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="levelCount">0/7</div>
+                    <div>📖 关卡</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- 欢迎界面 -->
+            <div class="screen active" id="welcomeScreen">
+                <div class="welcome-screen">
+                    <div class="icon">📚</div>
+                    <h2>欢迎来到《古人谈读书》学习游戏！</h2>
+                    <p>通过有趣的游戏，轻松学习古文知识<br>
+                    完成7个关卡，收集星星，成为读书小达人！</p>
+                    <div class="btn-group">
+                        <button class="btn btn-large" onclick="startGame()">开始学习 🚀</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 关卡选择界面 -->
+            <div class="screen" id="levelScreen">
+                <h2 style="text-align: center; color: #667eea; margin-bottom: 20px;">选择关卡</h2>
+                <div id="levelsContainer"></div>
+                <div class="btn-group">
+                    <button class="btn back-btn" onclick="showScreen('welcomeScreen')">返回首页</button>
+                </div>
+            </div>
+
+            <!-- 学习内容界面 -->
+            <div class="screen" id="learnScreen">
+                <div id="learnContent"></div>
+                <div class="btn-group">
+                    <button class="btn back-btn" onclick="showScreen('levelScreen')">返回关卡</button>
+                    <button class="btn btn-success" onclick="startPractice()">开始练习 ✨</button>
+                </div>
+            </div>
+
+            <!-- 练习游戏界面 -->
+            <div class="screen" id="practiceScreen">
+                <div id="practiceContent"></div>
+                <div class="btn-group">
+                    <button class="btn back-btn" onclick="showScreen('learnScreen')">返回学习</button>
+                </div>
+            </div>
+
+            <!-- 结果界面 -->
+            <div class="screen" id="resultScreen">
+                <div class="result-screen">
+                    <div class="result-icon" id="resultIcon">🎉</div>
+                    <div class="result-title" id="resultTitle">恭喜完成！</div>
+                    <div class="result-score" id="resultScore">0分</div>
+                    <div class="stars" id="resultStars"></div>
+                    <div id="achievementArea"></div>
+                    <div class="btn-group" style="margin-top: 30px;">
+                        <button class="btn" onclick="showScreen('levelScreen')">返回关卡</button>
+                        <button class="btn btn-success" onclick="nextLevel()">下一关 🎯</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏数据
+        const gameData = {
+            currentLevel: 0,
+            stars: 0,
+            score: 0,
+            completedLevels: [],
+            levelProgress: {}
+        };
+
+        // 关卡数据
+        const levels = [
+            {
+                id: 1,
+                title: "第一关：认识《古人谈读书》",
+                description: "了解三则古文的作者和主要内容",
+                content: {
+                    learn: `
+                        <div class="text-content">
+                            <h3>📖 《古人谈读书》</h3>
+                            <p>这篇课文包含三则古文，分别来自三位古代学者：</p>
+                            
+                            <h3>1. 孔子论学习态度</h3>
+                            <div class="quote">"敏而好学，不耻下问。"</div>
+                            <p><strong>意思：</strong>聪明且勤奋好学的人，不以向地位或学识不如自己的人请教为耻。</p>
+                            <p><strong>核心：</strong>虚心求教的学习态度</p>
+                            
+                            <h3>2. 朱熹谈读书方法</h3>
+                            <div class="quote">"读书有三到，谓心到、眼到、口到。"</div>
+                            <p><strong>意思：</strong>读书时要用心思考，眼睛专注，嘴巴朗读，三者缺一不可。</p>
+                            <p><strong>核心：</strong>全身心投入的读书方法</p>
+                            
+                            <h3>3. 曾国藩论读书要素</h3>
+                            <div class="quote">"士人读书，第一要有志，第二要有识，第三要有恒。"</div>
+                            <p><strong>意思：</strong>读书人首先要立志，其次要有见识，最后要有恒心。</p>
+                            <p><strong>核心：</strong>读书成功的三个关键要素</p>
+                        </div>
+                    `,
+                    practice: {
+                        type: "matching",
+                        question: "请将人物和他们的观点配对：",
+                        pairs: [
+                            { left: "孔子", right: "不耻下问" },
+                            { left: "朱熹", right: "心到、眼到、口到" },
+                            { left: "曾国藩", right: "有志、有识、有恒" }
+                        ]
+                    }
+                }
+            },
+            {
+                id: 2,
+                title: "第二关：理解孔子的观点",
+                description: "深入理解'不耻下问'的含义",
+                content: {
+                    learn: `
+                        <div class="text-content">
+                            <h3>📚 孔子的学习态度</h3>
+                            <div class="quote">"敏而好学，不耻下问。"</div>
+                            
+                            <h3>💡 理解要点：</h3>
+                            <p><strong>1. "敏而好学"</strong></p>
+                            <p>聪明且勤奋好学。不仅要聪明，还要努力学习。</p>
+                            
+                            <p><strong>2. "不耻下问"</strong></p>
+                            <p>不觉得向别人请教是丢脸的事。即使对方地位或学识不如自己，也要虚心学习。</p>
+                            
+                            <h3>🎯 实际应用：</h3>
+                            <p>比如：你数学很好，但语文不好，向语文好的同学请教，这就是"不耻下问"。</p>
+                            <p>记住：学习没有高低贵贱，虚心学习才能进步！</p>
+                        </div>
+                    `,
+                    practice: {
+                        type: "choice",
+                        question: "'不耻下问'是什么意思？",
+                        options: [
+                            "不觉得问别人问题丢脸",
+                            "不问简单的问题",
+                            "只问地位高的人",
+                            "不问任何问题"
+                        ],
+                        correct: 0
+                    }
+                }
+            },
+            {
+                id: 3,
+                title: "第三关：掌握朱熹的'三到'",
+                description: "学习'心到、眼到、口到'的读书方法",
+                content: {
+                    learn: `
+                        <div class="text-content">
+                            <h3>📚 朱熹的读书方法</h3>
+                            <div class="quote">"读书有三到，谓心到、眼到、口到。"</div>
+                            
+                            <h3>💡 三到详解：</h3>
+                            <p><strong>1. 心到</strong> - 用心思考</p>
+                            <p>读书时要动脑筋，理解内容，不能只是机械地读。</p>
+                            
+                            <p><strong>2. 眼到</strong> - 眼睛专注</p>
+                            <p>眼睛要看着文字，不能东张西望，要集中注意力。</p>
+                            
+                            <p><strong>3. 口到</strong> - 嘴巴朗读</p>
+                            <p>要读出声来，或者在心里默读，帮助记忆和理解。</p>
+                            
+                            <h3>🎯 试试看：</h3>
+                            <p>现在用"三到"方法读一段文字，感受一下和心不在焉地读有什么区别！</p>
+                        </div>
+                    `,
+                    practice: {
+                        type: "fill",
+                        question: "请填空：读书有三到，谓____、____、____。",
+                        blanks: [
+                            { answer: "心到", position: 0 },
+                            { answer: "眼到", position: 1 },
+                            { answer: "口到", position: 2 }
+                        ],
+                        text: "读书有三到，谓{0}、{1}、{2}。"
+                    }
+                }
+            },
+            {
+                id: 4,
+                title: "第四关：理解曾国藩的三要素",
+                description: "学习'有志、有识、有恒'的含义",
+                content: {
+                    learn: `
+                        <div class="text-content">
+                            <h3>📚 曾国藩的读书要素</h3>
+                            <div class="quote">"士人读书，第一要有志，第二要有识，第三要有恒。"</div>
+                            
+                            <h3>💡 三要素详解：</h3>
+                            <p><strong>1. 有志</strong> - 有目标</p>
+                            <p>读书要有目标，知道自己为什么读书，想达到什么目标。</p>
+                            
+                            <p><strong>2. 有识</strong> - 有见识</p>
+                            <p>要有见识，知道读什么书，怎么选择好书。</p>
+                            
+                            <p><strong>3. 有恒</strong> - 有恒心</p>
+                            <p>要有恒心，坚持读书，不能三天打鱼两天晒网。</p>
+                            
+                            <h3>🎯 想一想：</h3>
+                            <p>你有读书的目标吗？你坚持读书吗？</p>
+                        </div>
+                    `,
+                    practice: {
+                        type: "choice",
+                        question: "曾国藩认为读书需要哪三个要素？",
+                        options: [
+                            "有志、有识、有恒",
+                            "有心、有眼、有口",
+                            "有才、有德、有能",
+                            "有书、有笔、有纸"
+                        ],
+                        correct: 0
+                    }
+                }
+            },
+            {
+                id: 5,
+                title: "第五关：学习《忆读书》",
+                description: "了解冰心奶奶的读书经历",
+                content: {
+                    learn: `
+                        <div class="text-content">
+                            <h3>📚 《忆读书》- 冰心</h3>
+                            <p>这篇文章是冰心奶奶回忆自己从小到大的读书经历。</p>
+                            
+                            <h3>💡 主要内容：</h3>
+                            <p><strong>1. 从小爱读书</strong></p>
+                            <p>冰心奶奶从小就喜欢读书，读了很多书。</p>
+                            
+                            <p><strong>2. 读书的乐趣</strong></p>
+                            <p>读书让她感到快乐，学到了很多知识。</p>
+                            
+                            <p><strong>3. 读书的好处</strong></p>
+                            <p>读书能增长知识，开阔眼界，提高修养。</p>
+                            
+                            <h3>🎯 联系自己：</h3>
+                            <p>你读过哪些书？最喜欢哪本？为什么？</p>
+                        </div>
+                    `,
+                    practice: {
+                        type: "choice",
+                        question: "《忆读书》的作者是谁？",
+                        options: [
+                            "冰心",
+                            "鲁迅",
+                            "老舍",
+                            "巴金"
+                        ],
+                        correct: 0
+                    }
+                }
+            },
+            {
+                id: 6,
+                title: "第六关：综合理解",
+                description: "对比两篇课文，理解读书的重要性",
+                content: {
+                    learn: `
+                        <div class="text-content">
+                            <h3>📚 两篇课文的对比</h3>
+                            
+                            <h3>💡 相同点：</h3>
+                            <p>1. 都告诉我们读书很重要</p>
+                            <p>2. 都教我们如何读书</p>
+                            <p>3. 都强调读书的态度和方法</p>
+                            
+                            <h3>💡 不同点：</h3>
+                            <p><strong>《古人谈读书》</strong>：古人的观点，告诉我们读书的方法和态度</p>
+                            <p><strong>《忆读书》</strong>：现代人的经历，告诉我们读书的乐趣和好处</p>
+                            
+                            <h3>🎯 总结：</h3>
+                            <p>读书是一件快乐的事，要用正确的方法和态度去读书！</p>
+                        </div>
+                    `,
+                    practice: {
+                        type: "matching",
+                        question: "请将读书方法和对应的内容配对：",
+                        pairs: [
+                            { left: "心到", right: "用心思考" },
+                            { left: "眼到", right: "眼睛专注" },
+                            { left: "口到", right: "嘴巴朗读" },
+                            { left: "有志", right: "有目标" },
+                            { left: "有识", right: "有见识" },
+                            { left: "有恒", right: "有恒心" }
+                        ]
+                    }
+                }
+            },
+            {
+                id: 7,
+                title: "第七关：终极挑战",
+                description: "综合测试，检验学习成果",
+                content: {
+                    learn: `
+                        <div class="text-content">
+                            <h3>🎯 终极挑战</h3>
+                            <p>这是最后一关，检验你前面学到的所有知识！</p>
+                            <p>准备好了吗？让我们开始吧！</p>
+                        </div>
+                    `,
+                    practice: {
+                        type: "comprehensive",
+                        questions: [
+                            {
+                                type: "choice",
+                                question: "'不耻下问'是谁的观点？",
+                                options: ["孔子", "朱熹", "曾国藩", "冰心"],
+                                correct: 0
+                            },
+                            {
+                                type: "choice",
+                                question: "'读书有三到'是谁的观点？",
+                                options: ["孔子", "朱熹", "曾国藩", "冰心"],
+                                correct: 1
+                            },
+                            {
+                                type: "choice",
+                                question: "'有志、有识、有恒'是谁的观点？",
+                                options: ["孔子", "朱熹", "曾国藩", "冰心"],
+                                correct: 2
+                            },
+                            {
+                                type: "fill",
+                                question: "请填空：读书有三到，谓____、____、____。",
+                                text: "读书有三到，谓{0}、{1}、{2}。",
+                                blanks: [
+                                    { answer: "心到", position: 0 },
+                                    { answer: "眼到", position: 1 },
+                                    { answer: "口到", position: 2 }
+                                ]
+                            },
+                            {
+                                type: "choice",
+                                question: "《忆读书》的作者是谁？",
+                                options: ["冰心", "鲁迅", "老舍", "巴金"],
+                                correct: 0
+                            }
+                        ]
+                    }
+                }
+            }
+        ];
+
+        // 初始化
+        function init() {
+            loadProgress();
+            renderLevels();
+            updateStats();
+        }
+
+        // 加载进度
+        function loadProgress() {
+            const saved = localStorage.getItem('readingGameProgress');
+            if (saved) {
+                const data = JSON.parse(saved);
+                gameData.stars = data.stars || 0;
+                gameData.score = data.score || 0;
+                gameData.completedLevels = data.completedLevels || [];
+                gameData.levelProgress = data.levelProgress || {};
+            }
+        }
+
+        // 保存进度
+        function saveProgress() {
+            localStorage.setItem('readingGameProgress', JSON.stringify({
+                stars: gameData.stars,
+                score: gameData.score,
+                completedLevels: gameData.completedLevels,
+                levelProgress: gameData.levelProgress
+            }));
+        }
+
+        // 显示界面
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // 开始游戏
+        function startGame() {
+            showScreen('levelScreen');
+        }
+
+        // 渲染关卡
+        function renderLevels() {
+            const container = document.getElementById('levelsContainer');
+            container.innerHTML = '';
+            
+            levels.forEach((level, index) => {
+                const isCompleted = gameData.completedLevels.includes(level.id);
+                const isLocked = index > 0 && !gameData.completedLevels.includes(levels[index - 1].id);
+                
+                const card = document.createElement('div');
+                card.className = `level-card ${isLocked ? 'locked' : ''} ${isCompleted ? 'completed' : ''}`;
+                card.onclick = isLocked ? null : () => startLevel(level.id);
+                
+                card.innerHTML = `
+                    <div class="level-header">
+                        <div class="level-title">${level.title}</div>
+                        <div class="level-badge ${isCompleted ? 'completed' : isLocked ? 'locked' : ''}">
+                            ${isCompleted ? '✓ 完成' : isLocked ? '🔒 锁定' : '开始'}
+                        </div>
+                    </div>
+                    <div class="level-description">${level.description}</div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // 开始关卡
+        function startLevel(levelId) {
+            gameData.currentLevel = levelId;
+            const level = levels.find(l => l.id === levelId);
+            
+            document.getElementById('learnContent').innerHTML = level.content.learn;
+            showScreen('learnScreen');
+        }
+
+        // 开始练习
+        function startPractice() {
+            const level = levels.find(l => l.id === gameData.currentLevel);
+            const practice = level.content.practice;
+            
+            let html = '<div class="game-area">';
+            
+            if (practice.type === 'choice') {
+                html += renderChoiceQuestion(practice);
+            } else if (practice.type === 'matching') {
+                html += renderMatchingGame(practice);
+            } else if (practice.type === 'fill') {
+                html += renderFillBlank(practice);
+            } else if (practice.type === 'comprehensive') {
+                html += renderComprehensive(practice);
+            }
+            
+            html += '</div>';
+            
+            document.getElementById('practiceContent').innerHTML = html;
+            showScreen('practiceScreen');
+        }
+
+        // 渲染选择题
+        function renderChoiceQuestion(practice) {
+            let html = `
+                <div class="question-card">
+                    <div class="question-title">📝 选择题</div>
+                    <div class="question-text">${practice.question}</div>
+                    <div class="options" id="optionsContainer">
+            `;
+            
+            practice.options.forEach((option, index) => {
+                html += `
+                    <div class="option" onclick="selectOption(${index}, ${practice.correct})">
+                        ${String.fromCharCode(65 + index)}. ${option}
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                    <div class="feedback" id="feedback"></div>
+                </div>
+            `;
+            
+            return html;
+        }
+
+        // 选择选项
+        function selectOption(selected, correct) {
+            const options = document.querySelectorAll('.option');
+            const feedback = document.getElementById('feedback');
+            
+            options.forEach((opt, index) => {
+                opt.onclick = null;
+                if (index === correct) {
+                    opt.classList.add('correct');
+                } else if (index === selected) {
+                    opt.classList.add('wrong');
+                }
+            });
+            
+            if (selected === correct) {
+                feedback.className = 'feedback correct show';
+                feedback.innerHTML = '🎉 答对了！你真棒！';
+                gameData.score += 10;
+                setTimeout(() => {
+                    completeLevel(3);
+                }, 1500);
+            } else {
+                feedback.className = 'feedback wrong show';
+                feedback.innerHTML = '❌ 答错了，再想想吧！正确答案是：' + String.fromCharCode(65 + correct);
+                setTimeout(() => {
+                    showScreen('learnScreen');
+                }, 2000);
+            }
+            
+            updateStats();
+        }
+
+        // 渲染配对游戏
+        function renderMatchingGame(practice) {
+            let html = `
+                <div class="question-card">
+                    <div class="question-title">🎯 配对游戏</div>
+                    <div class="question-text">${practice.question}</div>
+                    <div class="matching-game">
+                        <div>
+                            <h4 style="text-align: center; margin-bottom: 15px;">左侧</h4>
+            `;
+            
+            practice.pairs.forEach((pair, index) => {
+                html += `
+                    <div class="match-item" data-index="${index}" data-side="left" onclick="selectMatchItem(${index}, 'left')">
+                        ${pair.left}
+                    </div>
+                `;
+            });
+            
+            html += `
+                        </div>
+                        <div>
+                            <h4 style="text-align: center; margin-bottom: 15px;">右侧</h4>
+            `;
+            
+            const shuffled = [...practice.pairs].sort(() => Math.random() - 0.5);
+            shuffled.forEach((pair, index) => {
+                html += `
+                    <div class="match-item" data-pair="${practice.pairs.indexOf(pair)}" data-side="right" onclick="selectMatchItem(${practice.pairs.indexOf(pair)}, 'right')">
+                        ${pair.right}
+                    </div>
+                `;
+            });
+            
+            html += `
+                        </div>
+                    </div>
+                    <div class="feedback" id="feedback"></div>
+                </div>
+            `;
+            
+            window.matchState = { left: null, right: null, matched: 0, total: practice.pairs.length };
+            
+            return html;
+        }
+
+        // 选择配对项
+        function selectMatchItem(index, side) {
+            const item = document.querySelector(`[data-${side}="${index}"]`);
+            if (item.classList.contains('matched')) return;
+            
+            if (window.matchState[side] === null) {
+                window.matchState[side] = index;
+                item.classList.add('selected');
+            } else if (window.matchState[side] === index) {
+                window.matchState[side] = null;
+                item.classList.remove('selected');
+            } else {
+                // 检查是否匹配
+                const leftIndex = window.matchState.left;
+                const rightIndex = window.matchState.right;
+                
+                if (leftIndex !== null && rightIndex !== null) {
+                    const level = levels.find(l => l.id === gameData.currentLevel);
+                    const pairs = level.content.practice.pairs;
+                    
+                    if (leftIndex === rightIndex) {
+                        // 匹配成功
+                        document.querySelector(`[data-left="${leftIndex}"]`).classList.add('matched');
+                        document.querySelector(`[data-right="${rightIndex}"]`).classList.add('matched');
+                        window.matchState.matched++;
+                        window.matchState.left = null;
+                        window.matchState.right = null;
+                        
+                        if (window.matchState.matched === window.matchState.total) {
+                            const feedback = document.getElementById('feedback');
+                            feedback.className = 'feedback correct show';
+                            feedback.innerHTML = '🎉 全部配对成功！你真厉害！';
+                            gameData.score += 20;
+                            setTimeout(() => {
+                                completeLevel(3);
+                            }, 1500);
+                        }
+                    } else {
+                        // 匹配失败
+                        document.querySelector(`[data-left="${leftIndex}"]`).classList.remove('selected');
+                        document.querySelector(`[data-right="${rightIndex}"]`).classList.remove('selected');
+                        window.matchState.left = null;
+                        window.matchState.right = null;
+                    }
+                }
+            }
+            
+            updateStats();
+        }
+
+        // 渲染填空题
+        function renderFillBlank(practice) {
+            let html = `
+                <div class="question-card">
+                    <div class="question-title">✍️ 填空题</div>
+                    <div class="question-text">${practice.question}</div>
+                    <div class="fill-blank">
+                        <div class="blank-text" id="blankText"></div>
+                        <div class="btn-group">
+                            <button class="btn" onclick="checkFillBlank()">检查答案 ✓</button>
+                        </div>
+                        <div class="feedback" id="feedback"></div>
+                    </div>
+                </div>
+            `;
+            
+            // 渲染填空文本
+            setTimeout(() => {
+                let text = practice.text;
+                const container = document.getElementById('blankText');
+                practice.blanks.forEach((blank, index) => {
+                    text = text.replace(`{${blank.position}}`, 
+                        `<input type="text" class="blank-input" id="blank${index}" placeholder="填空">`);
+                });
+                container.innerHTML = text;
+            }, 100);
+            
+            window.fillBlankAnswers = practice.blanks;
+            
+            return html;
+        }
+
+        // 检查填空题
+        function checkFillBlank() {
+            const feedback = document.getElementById('feedback');
+            let allCorrect = true;
+            
+            window.fillBlankAnswers.forEach((blank, index) => {
+                const input = document.getElementById(`blank${index}`);
+                if (input.value.trim() === blank.answer) {
+                    input.classList.add('correct');
+                    input.classList.remove('wrong');
+                } else {
+                    input.classList.add('wrong');
+                    input.classList.remove('correct');
+                    allCorrect = false;
+                }
+            });
+            
+            if (allCorrect) {
+                feedback.className = 'feedback correct show';
+                feedback.innerHTML = '🎉 全部填对！你真棒！';
+                gameData.score += 15;
+                setTimeout(() => {
+                    completeLevel(3);
+                }, 1500);
+            } else {
+                feedback.className = 'feedback wrong show';
+                feedback.innerHTML = '❌ 有些答案不对，再检查一下！';
+            }
+            
+            updateStats();
+        }
+
+        // 渲染综合测试
+        function renderComprehensive(practice) {
+            let html = '<div class="question-card">';
+            html += '<div class="question-title">🎯 综合测试</div>';
+            html += '<div class="question-text">这是终极挑战，回答所有问题！</div>';
+            
+            practice.questions.forEach((q, index) => {
+                if (q.type === 'choice') {
+                    html += `
+                        <div style="margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                            <div style="font-weight: bold; margin-bottom: 15px;">第${index + 1}题：${q.question}</div>
+                            <div class="options">
+                    `;
+                    q.options.forEach((opt, optIndex) => {
+                        html += `
+                            <div class="option" onclick="selectComprehensiveOption(${index}, ${optIndex}, ${q.correct})">
+                                ${String.fromCharCode(65 + optIndex)}. ${opt}
+                            </div>
+                        `;
+                    });
+                    html += '</div></div>';
+                } else if (q.type === 'fill') {
+                    html += `
+                        <div style="margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                            <div style="font-weight: bold; margin-bottom: 15px;">第${index + 1}题：${q.question}</div>
+                            <div id="fill${index}"></div>
+                        </div>
+                    `;
+                }
+            });
+            
+            html += `
+                <div class="btn-group">
+                    <button class="btn btn-success" onclick="checkComprehensive()">提交答案 ✓</button>
+                </div>
+                <div class="feedback" id="comprehensiveFeedback"></div>
+            </div>
+            `;
+            
+            // 渲染填空题
+            setTimeout(() => {
+                practice.questions.forEach((q, index) => {
+                    if (q.type === 'fill') {
+                        let text = q.text;
+                        const container = document.getElementById(`fill${index}`);
+                        q.blanks.forEach((blank, blankIndex) => {
+                            text = text.replace(`{${blank.position}}`, 
+                                `<input type="text" class="blank-input" id="compFill${index}_${blankIndex}" placeholder="填空">`);
+                        });
+                        container.innerHTML = text;
+                    }
+                });
+            }, 100);
+            
+            window.comprehensiveData = practice.questions;
+            window.comprehensiveAnswers = {};
+            
+            return html;
+        }
+
+        // 选择综合测试选项
+        function selectComprehensiveOption(qIndex, selected, correct) {
+            window.comprehensiveAnswers[qIndex] = { selected, correct, type: 'choice' };
+            const options = document.querySelectorAll(`#practiceContent .question-card > div:nth-child(${qIndex + 3}) .option`);
+            options.forEach((opt, index) => {
+                opt.onclick = null;
+                if (index === correct) {
+                    opt.classList.add('correct');
+                } else if (index === selected) {
+                    opt.classList.add('wrong');
+                }
+            });
+        }
+
+        // 检查综合测试
+        function checkComprehensive() {
+            const feedback = document.getElementById('comprehensiveFeedback');
+            let correctCount = 0;
+            let totalCount = window.comprehensiveData.length;
+            
+            window.comprehensiveData.forEach((q, index) => {
+                if (q.type === 'choice') {
+                    if (window.comprehensiveAnswers[index] && 
+                        window.comprehensiveAnswers[index].selected === q.correct) {
+                        correctCount++;
+                    }
+                } else if (q.type === 'fill') {
+                    let allCorrect = true;
+                    q.blanks.forEach((blank, blankIndex) => {
+                        const input = document.getElementById(`compFill${index}_${blankIndex}`);
+                        if (input.value.trim() === blank.answer) {
+                            input.classList.add('correct');
+                            input.classList.remove('wrong');
+                        } else {
+                            input.classList.add('wrong');
+                            input.classList.remove('correct');
+                            allCorrect = false;
+                        }
+                    });
+                    if (allCorrect) correctCount++;
+                }
+            });
+            
+            const score = Math.round((correctCount / totalCount) * 100);
+            gameData.score += score;
+            
+            if (correctCount === totalCount) {
+                feedback.className = 'feedback correct show';
+                feedback.innerHTML = `🎉 完美！全部答对！得分：${score}分`;
+                setTimeout(() => {
+                    completeLevel(5);
+                }, 2000);
+            } else {
+                feedback.className = 'feedback wrong show';
+                feedback.innerHTML = `答对了 ${correctCount}/${totalCount} 题，得分：${score}分。继续加油！`;
+                if (score >= 80) {
+                    setTimeout(() => {
+                        completeLevel(4);
+                    }, 2000);
+                } else {
+                    setTimeout(() => {
+                        completeLevel(3);
+                    }, 2000);
+                }
+            }
+            
+            updateStats();
+        }
+
+        // 完成关卡
+        function completeLevel(stars) {
+            if (!gameData.completedLevels.includes(gameData.currentLevel)) {
+                gameData.completedLevels.push(gameData.currentLevel);
+                gameData.stars += stars;
+            }
+            
+            saveProgress();
+            showResult(stars);
+        }
+
+        // 显示结果
+        function showResult(stars) {
+            const level = levels.find(l => l.id === gameData.currentLevel);
+            const isLastLevel = gameData.currentLevel === 7;
+            
+            document.getElementById('resultIcon').textContent = isLastLevel ? '🏆' : '🎉';
+            document.getElementById('resultTitle').textContent = isLastLevel ? '恭喜完成所有关卡！' : '恭喜完成关卡！';
+            document.getElementById('resultScore').textContent = `+${stars} ⭐`;
+            
+            const starsContainer = document.getElementById('resultStars');
+            starsContainer.innerHTML = '';
+            for (let i = 0; i < stars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star active';
+                star.textContent = '⭐';
+                starsContainer.appendChild(star);
+            }
+            
+            const achievementArea = document.getElementById('achievementArea');
+            achievementArea.innerHTML = '';
+            
+            if (isLastLevel && gameData.completedLevels.length === 7) {
+                achievementArea.innerHTML = `
+                    <div class="achievement">
+                        <div class="achievement-icon">🏆</div>
+                        <div class="achievement-title">读书小达人！</div>
+                        <p>你完成了所有关卡，成为了真正的读书小达人！</p>
+                    </div>
+                `;
+            }
+            
+            showScreen('resultScreen');
+            renderLevels();
+        }
+
+        // 下一关
+        function nextLevel() {
+            if (gameData.currentLevel < 7) {
+                startLevel(gameData.currentLevel + 1);
+            } else {
+                showScreen('levelScreen');
+            }
+        }
+
+        // 更新统计
+        function updateStats() {
+            document.getElementById('starsCount').textContent = gameData.stars;
+            document.getElementById('scoreCount').textContent = gameData.score;
+            document.getElementById('levelCount').textContent = `${gameData.completedLevels.length}/7`;
+            
+            const progress = (gameData.completedLevels.length / 7) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            saveProgress();
+        }
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>

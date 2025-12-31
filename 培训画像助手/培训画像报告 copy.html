@@ -1,0 +1,660 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教师培训画像报告 - 张磊</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #4a90e2;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .section-title {
+            font-size: 20px;
+            color: #4a90e2;
+            border-left: 4px solid #4a90e2;
+            padding-left: 15px;
+            margin-bottom: 20px;
+        }
+        .teacher-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            color: #2c3e50;
+            font-size: 16px;
+        }
+        .path-diagram {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .stage {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 0 5px;
+            transition: all 0.3s;
+        }
+        .stage.current {
+            background: #4a90e2;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(74, 144, 226, 0.3);
+        }
+        .stage:not(.current) {
+            background: #e9ecef;
+            color: #666;
+        }
+        .stage-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .arrow {
+            color: #4a90e2;
+            font-size: 24px;
+        }
+        .chart-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+        }
+        .radar-chart {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+        }
+        .dimension-list {
+            list-style: none;
+            padding: 0;
+        }
+        .dimension-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-left: 3px solid #4a90e2;
+            border-radius: 3px;
+        }
+        .dimension-item strong {
+            color: #4a90e2;
+        }
+        .trend {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 18px;
+        }
+        .trend.up { color: #28a745; }
+        .trend.down { color: #dc3545; }
+        .trend.stable { color: #6c757d; }
+        .training-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .bar-chart {
+            margin: 20px 0;
+        }
+        .bar-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .bar-label {
+            width: 150px;
+            font-size: 14px;
+            color: #666;
+        }
+        .bar-container {
+            flex: 1;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4a90e2, #667eea);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: bold;
+            transition: width 0.5s;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .table th, .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .table th {
+            background: #4a90e2;
+            color: white;
+            font-weight: bold;
+        }
+        .table tr:hover {
+            background: #f8f9fa;
+        }
+        .btn-group {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            margin: 0 10px;
+            background: #4a90e2;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #357abd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>教师培训画像报告</h1>
+            <p style="color: #666; margin-top: 10px;">生成时间：2025年12月16日 09:39</p>
+        </div>
+        
+        <!-- 模块1：教师基本信息 -->
+        <div class="section">
+            <h2 class="section-title">一、教师基本信息</h2>
+            <div class="teacher-info">
+                <div class="info-item">
+                    <span class="info-label">姓名</span>
+                    <span class="info-value">张磊</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">教龄</span>
+                    <span class="info-value">9年</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">所在地区</span>
+                    <span class="info-value">东莞市</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">所在学校</span>
+                    <span class="info-value">东莞市东华高级中学</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">任教学科</span>
+                    <span class="info-value">英语</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">职务</span>
+                    <span class="info-value">班主任</span>
+                </div>
+            </div>
+            <div class="btn-group">
+                <a href="#" class="btn">导出报告</a>
+                <a href="#" class="btn">更新数据</a>
+                <a href="#" class="btn">查看评分分析报告</a>
+            </div>
+        </div>
+        
+        <!-- 模块2：专业发展路径 -->
+        <div class="section">
+            <h2 class="section-title">二、专业发展路径</h2>
+            <div class="path-diagram">
+                <div class="stage">
+                    <div class="stage-name">适应期-新手教师</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="stage">
+                    <div class="stage-name">发展期-熟练教师</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="stage current">
+                    <div class="stage-name">成熟期-骨干教师</div>
+                    <div style="font-size: 12px; margin-top: 5px;">当前阶段</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="stage">
+                    <div class="stage-name">稳定期-卓越教师</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="stage">
+                    <div class="stage-name">创造期-教育家型</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h3 style="margin-bottom: 15px; color: #2c3e50;">多维度能力对比</h3>
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <div class="bar-label">专业理念与师德</div>
+                        <div style="flex: 1; display: flex; gap: 5px;">
+                            <div style="flex: 1;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">我的数据: 98分</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 98%;">98</div>
+                                </div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">区域平均: 73分</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 73%; background: linear-gradient(90deg, #28a745, #20c997);">73</div>
+                                </div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">常模值: 75分</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 75%; background: linear-gradient(90deg, #ffc107, #fd7e14);">75</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">专业知识</div>
+                        <div style="flex: 1; display: flex; gap: 5px;">
+                            <div style="flex: 1;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">我的数据: 100分</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 100%;">100</div>
+                                </div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">区域平均: 70分</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 70%; background: linear-gradient(90deg, #28a745, #20c997);">70</div>
+                                </div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">常模值: 72分</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 72%; background: linear-gradient(90deg, #ffc107, #fd7e14);">72</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">专业能力</div>
+                        <div style="flex: 1; display: flex; gap: 5px;">
+                            <div style="flex: 1;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">我的数据: 100分</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 100%;">100</div>
+                                </div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">区域平均: 68分</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 68%; background: linear-gradient(90deg, #28a745, #20c997);">68</div>
+                                </div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">常模值: 70分</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 70%; background: linear-gradient(90deg, #ffc107, #fd7e14);">70</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">专业发展</div>
+                        <div style="flex: 1; display: flex; gap: 5px;">
+                            <div style="flex: 1;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">我的数据: 66分</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 66%;">66</div>
+                                </div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">区域平均: 66分</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 66%; background: linear-gradient(90deg, #28a745, #20c997);">66</div>
+                                </div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">常模值: 68分</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 68%; background: linear-gradient(90deg, #ffc107, #fd7e14);">68</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">数字素养</div>
+                        <div style="flex: 1; display: flex; gap: 5px;">
+                            <div style="flex: 1;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">我的数据: 100分</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 100%;">100</div>
+                                </div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">区域平均: 63分</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 63%; background: linear-gradient(90deg, #28a745, #20c997);">63</div>
+                                </div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">常模值: 65分</div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 65%; background: linear-gradient(90deg, #ffc107, #fd7e14);">65</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 模块3：当前阶段分析 -->
+        <div class="section">
+            <h2 class="section-title">三、当前专业发展阶段分析</h2>
+            <div class="chart-container">
+                <h3 style="margin-bottom: 15px; color: #2c3e50;">多维度雷达图</h3>
+                <div class="radar-chart">
+                    <p style="color: #666;">（雷达图可视化 - 实际应用中可使用Chart.js等库实现）</p>
+                </div>
+            </div>
+            <div style="margin-top: 20px;">
+                <h3 style="margin-bottom: 15px; color: #2c3e50;">细分指标列表</h3>
+                <ul class="dimension-list">
+                    <li class="dimension-item">
+                        <strong>专业理念与师德</strong>：98分
+                        <span class="trend up">↑</span>
+                    </li>
+                    <li class="dimension-item">
+                        <strong>专业知识</strong>：100分
+                        <span class="trend up">↑</span>
+                    </li>
+                    <li class="dimension-item">
+                        <strong>专业能力</strong>：100分
+                        <span class="trend up">↑</span>
+                    </li>
+                    <li class="dimension-item">
+                        <strong>专业发展</strong>：66分
+                        <span class="trend stable">-</span>
+                    </li>
+                    <li class="dimension-item">
+                        <strong>数字素养</strong>：100分
+                        <span class="trend up">↑</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- 模块4：专业发展维度 -->
+        <div class="section">
+            <h2 class="section-title">四、专业发展维度数据</h2>
+            <div class="training-stats">
+                <div class="stat-card">
+                    <h3>教研活动参与度</h3>
+                    <div class="value">{stats['training_count']}</div>
+                    <div style="font-size: 12px; margin-top: 5px;">次培训</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <h3>专业学习主动性</h3>
+                    <div class="value">{len([h for h in stats['yearly_hours'].values() if h > 0])}</div>
+                    <div style="font-size: 12px; margin-top: 5px;">年持续学习</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <h3>累计培训学时</h3>
+                    <div class="value">{stats['total_hours']}</div>
+                    <div style="font-size: 12px; margin-top: 5px;">学时</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h3 style="margin-bottom: 15px; color: #2c3e50;">历年培训学时分布</h3>
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <div class="bar-label">2023年</div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 100.0%;">1828学时</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">2024年</div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 96.99124726477024%;">1773学时</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">2025年</div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 92.01312910284464%;">1682学时</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 模块5：数字素养维度 -->
+        <div class="section">
+            <h2 class="section-title">五、数字素养维度数据</h2>
+            <div class="chart-container">
+                <h3 style="margin-bottom: 15px; color: #2c3e50;">数字素养能力评估</h3>
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <div class="bar-label">教育技术应用能力</div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 100%;">100分</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">在线教学平台使用</div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 95%;">95分</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">数字化教学资源开发</div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 97%;">97分</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">数据驱动教学改进</div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 92%;">92分</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 模块6：培训画像分析 -->
+        <div class="section">
+            <h2 class="section-title">六、培训历史智能评估</h2>
+            <div class="training-stats">
+                <div class="stat-card">
+                    <h3>培训项目总数</h3>
+                    <div class="value">{stats['training_count']}</div>
+                    <div style="font-size: 12px; margin-top: 5px;">项</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <h3>累计培训学时</h3>
+                    <div class="value">{stats['total_hours']}</div>
+                    <div style="font-size: 12px; margin-top: 5px;">学时</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <h3>培训层级分布</h3>
+                    <div class="value">{len(stats['level_distribution'])}</div>
+                    <div style="font-size: 12px; margin-top: 5px;">种类型</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h3 style="margin-bottom: 15px; color: #2c3e50;">培训级别分布</h3>
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <div class="bar-label">国家级培训（国培）</div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 24.5%;">49项 (24.5%)</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">市级培训（市培）</div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 20.5%;">41项 (20.5%)</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">其它</div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 20.5%;">41项 (20.5%)</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">校级培训（校培）</div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 18.0%;">36项 (18.0%)</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">省级培训（省培）</div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 16.5%;">33项 (16.5%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-container" style="margin-top: 20px;">
+                <h3 style="margin-bottom: 15px; color: #2c3e50;">培训维度分布</h3>
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <div class="bar-label">专业能力</div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 65.0%;">130项 (65.0%)</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">数字素养</div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 23.0%;">46项 (23.0%)</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">专业知识</div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 6.5%;">13项 (6.5%)</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">专业理念与师德</div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 5.5%;">11项 (5.5%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 模块7：智能决策分析 -->
+        <div class="section">
+            <h2 class="section-title">七、智能决策分析</h2>
+            <div class="chart-container">
+                <h3 style="margin-bottom: 15px; color: #2c3e50;">推荐培训主题</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>推荐培训主题</th>
+                            <th>优先级</th>
+                            <th>建议学时</th>
+                            <th>提升方向</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>专业能力深化培训</td>
+                            <td>中</td>
+                            <td>30学时</td>
+                            <td>持续提升专业能力，向更高阶段发展</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e9ecef; color: #666;">
+            <p>本报告由培训画像助手自动生成</p>
+            <p style="font-size: 12px; margin-top: 10px;">数据来源：教师信息管理系统、培训管理系统</p>
+        </div>
+    </div>
+</body>
+</html>
