@@ -14,10 +14,16 @@
             <div class="game-title">街霸风格双人对战</div>
             
             <div class="start-button-container">
-                <button id="startGameBtn" class="start-btn">▶️ 开始游戏</button>
+                <button id="startGameBtn" class="start-btn">
+                    <span class="start-btn-emoji">🎮</span>
+                    开始游戏
+                </button>
+                <div class="start-instruction">
+                    按 <span class="key">空格键</span> 或 <span class="key">回车键</span> 开始
+                </div>
             </div>
             
-            <div class="audio-controls" id="audioControls">
+            <div class="audio-controls collapsed" id="audioControls">
                 <h4>🎵 音效控制 <small>(按 = 键折叠)</small></h4>
                 <div class="audio-buttons">
                     <button id="toggleAudio" class="audio-btn">🔊 音效: 开</button>
@@ -69,12 +75,12 @@
                 <div class="player-controls">
                     <h4>Player A (左侧)</h4>
                     <p>W-跳跃 A-左移 S-蹲下 D-右移</p>
-                    <p>J-轻攻 K-重攻 L-特技 I-绝招 O-超必杀</p>
+                    <p>1-轻攻 2-重攻 3-特技 4-绝招 5-超必杀</p>
                 </div>
                 <div class="player-controls">
                     <h4>Player B (右侧)</h4>
                     <p>↑-跳跃 ←-左移 ↓-蹲下 →-右移</p>
-                    <p>1-轻攻 2-重攻 3-特技 4-绝招 5-超必杀</p>
+                    <p>J-轻攻 K-重攻 L-特技 I-绝招 O-超必杀</p>
                 </div>
             </div>
         </div>
@@ -86,7 +92,7 @@
     <script src="effects.js"></script>
     <script src="ui.js"></script>
     <script src="audio.js"></script>
-    <script src="game.js"></script>
     <script src="audio-controls.js"></script>
+    <script src="game.js"></script>
 </body>
 </html>

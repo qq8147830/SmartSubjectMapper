@@ -1,5 +1,6 @@
 class Game {
     constructor() {
+        console.log('🎮 Game - Constructor called');
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.width = this.canvas.width;
@@ -27,15 +28,18 @@ class Game {
         
         this.audioSystem = new AudioSystem();
         
+        console.log('🎮 Game - About to call init()');
         this.init();
+        console.log('🎮 Game - Constructor complete');
     }
     
     init() {
         this.setupEventListeners();
         this.setupInput();
         this.setupUI();
+        this.setupStartButton();
         this.loadCharacters();
-        this.startGame();
+        this.gameState = 'menu';
     }
     
     setupEventListeners() {
@@ -43,11 +47,58 @@ class Game {
     }
     
     setupInput() {
+        console.log('🎮 Game - Setting up input manager');
         this.inputManager = new InputManager();
+        console.log('🎮 Game - Input manager created:', this.inputManager);
     }
     
     setupUI() {
         this.uiSystem = new UISystem(this);
+        this.setupAudioControls();
+    }
+    
+    setupAudioControls() {
+        this.audioControls = new AudioControls(this.audioSystem);
+    }
+    
+    setupStartButton() {
+        const startBtn = document.getElementById('startGameBtn');
+        if (startBtn) {
+            startBtn.addEventListener('click', () => {
+                this.startGame();
+                startBtn.style.display = 'none';
+            });
+        }
+        
+        // 添加键盘支持（空格键和回车键）
+        this.setupKeyboardStart();
+    }
+    
+    setupKeyboardStart() {
+        // 移除旧的监听器
+        if (this._keyboardStartHandler) {
+            document.removeEventListener('keydown', this._keyboardStartHandler);
+            this._keyboardStartHandler = null;
+        }
+
+        this._keyboardStartHandler = (e) => {
+            // 只在菜单状态下响应
+            if (this.gameState !== 'menu') return;
+            
+            // 检查是否是空格或回车键
+            if (e.code === 'Space' || e.code === 'Enter') {
+                e.preventDefault();
+                this.startGame();
+                
+                // 隐藏开始按钮和说明
+                const startBtn = document.getElementById('startGameBtn');
+                if (startBtn) {
+                    startBtn.style.display = 'none';
+                }
+            }
+        };
+
+        document.addEventListener('keydown', this._keyboardStartHandler);
     }
     
     loadCharacters() {
@@ -63,6 +114,22 @@ class Game {
         this.roundActive = true;
         this.roundTimer = 99;
         this.resetRound();
+        
+        // 隐藏开始界面元素
+        this.hideStartInterface();
+    }
+    
+    hideStartInterface() {
+        const startBtn = document.getElementById('startGameBtn');
+        const startInstruction = document.querySelector('.start-instruction');
+        
+        if (startBtn) {
+            startBtn.style.display = 'none';
+        }
+        
+        if (startInstruction) {
+            startInstruction.style.display = 'none';
+        }
     }
     
     resetRound() {
@@ -101,12 +168,14 @@ class Game {
         this.deltaTime = deltaTime;
         
         if (this.gameState === 'playing') {
+            // 先更新输入，再处理游戏逻辑
+            this.updateInput();
+            
             this.updateRoundTimer(deltaTime);
             this.updatePlayers(deltaTime);
             this.updateEffects(deltaTime);
             this.updateProjectiles(deltaTime);
             this.updateComboSystem(deltaTime);
-            this.updateInput();
             this.checkCollisions();
             this.checkWinCondition();
         }
@@ -125,8 +194,16 @@ class Game {
     }
     
     updatePlayers(deltaTime) {
-        if (this.playerA) this.playerA.update(deltaTime, this.inputManager.getPlayerAInput());
-        if (this.playerB) this.playerB.update(deltaTime, this.inputManager.getPlayerBInput());
+        const playerAInput = this.inputManager.getPlayerAInput();
+        const playerBInput = this.inputManager.getPlayerBInput();
+        
+        // 调试输出：追踪输入传递给角色的过程
+        if (this.gameState === 'playing') {
+            console.log('Game Update - PlayerB Input:', playerBInput);
+        }
+        
+        if (this.playerA) this.playerA.update(deltaTime, playerAInput);
+        if (this.playerB) this.playerB.update(deltaTime, playerBInput);
         
         this.updatePlayerPositions();
     }
@@ -218,7 +295,9 @@ class Game {
         if (this.playerA.isAttacking() && this.checkCollision(this.playerA, this.playerB)) {
             if (this.playerA.canHit()) {
                 const damage = this.playerA.getCurrentAttackDamage();
-                this.playerB.takeDamage(damage);
+                const knockback = 150;
+                const direction = this.playerA.isFacingRight ? 1 : -1;
+                this.playerB.takeDamage(damage, knockback, direction);
                 this.addCombo(this.playerA);
                 this.createHitEffect(this.playerB.x, this.playerB.y);
                 this.audioSystem.playSound('hit');
@@ -229,7 +308,9 @@ class Game {
         if (this.playerB.isAttacking() && this.checkCollision(this.playerB, this.playerA)) {
             if (this.playerB.canHit()) {
                 const damage = this.playerB.getCurrentAttackDamage();
-                this.playerA.takeDamage(damage);
+                const knockback = 150;
+                const direction = this.playerB.isFacingRight ? 1 : -1;
+                this.playerA.takeDamage(damage, knockback, direction);
                 this.addCombo(this.playerB);
                 this.createHitEffect(this.playerA.x, this.playerA.y);
                 this.audioSystem.playSound('hit');

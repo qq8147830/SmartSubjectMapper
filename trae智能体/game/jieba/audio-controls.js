@@ -1,10 +1,16 @@
 class AudioControls {
     constructor(audioSystem) {
         this.audioSystem = audioSystem;
-        this.isCollapsed = false;
+        this.isCollapsed = true;
         this.setupEventListeners();
         this.updateDisplay();
         this.setupKeyboardControls();
+        
+        // 确保初始状态与CSS类一致
+        const audioControls = document.getElementById('audioControls');
+        if (audioControls) {
+            audioControls.classList.add('collapsed');
+        }
     }
     
     setupEventListeners() {
@@ -12,15 +18,31 @@ class AudioControls {
         this.setupMusicToggle();
         this.setupSfxToggle();
         this.setupVolumeControls();
+        this.setupKeyboardControls();
     }
     
     setupKeyboardControls() {
-        document.addEventListener('keydown', (e) => {
+        // 移除可能存在的旧监听器
+        if (this._keyboardHandler) {
+            document.removeEventListener('keydown', this._keyboardHandler);
+            this._keyboardHandler = null;
+        }
+
+        this._keyboardHandler = (e) => {
+            console.log('🔊 AudioControls - Keydown event:', e.code, 'Key:', e.key, 'Time:', Date.now());
             if (e.key === '=') {
                 e.preventDefault();
+                console.log('🔊 AudioControls - Toggling collapse');
+                // 不阻止事件冒泡，只处理 '=' 键
                 this.toggleCollapse();
+                return;
             }
-        });
+            // 对于其他按键，让事件继续传播
+            console.log('🔊 AudioControls - Allowing event to propagate');
+        };
+
+        console.log('🔊 AudioControls - Setting up keyboard event listener');
+        document.addEventListener('keydown', this._keyboardHandler);
     }
     
     toggleCollapse() {
@@ -225,11 +247,19 @@ class AudioControls {
 let audioControls;
 
 function initializeAudioControls() {
+    // 等待window.game存在再初始化
     if (window.game && window.game.audioSystem) {
+        if (audioControls) {
+            audioControls.destroy();
+        }
         audioControls = new AudioControls(window.game.audioSystem);
+    } else {
+        // 如果game还没有初始化，等待一下再尝试
+        setTimeout(initializeAudioControls, 100);
     }
 }
 
+// 确保在DOM加载完成后初始化
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeAudioControls);
 } else {

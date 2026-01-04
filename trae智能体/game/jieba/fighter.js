@@ -1,6 +1,7 @@
 class Fighter {
     constructor(name, x, y, characterType) {
         this.name = name;
+        this.id = name; // 添加id属性用于调试
         this.x = x;
         this.y = y;
         this.characterType = characterType;
@@ -14,7 +15,7 @@ class Fighter {
         this.maxHp = 1000;
         this.hp = this.maxHp;
         this.maxEnergy = 100;
-        this.energy = 0;
+        this.energy = 50;
         
         this.baseStats = this.getBaseStats();
         this.speed = this.baseStats.speed;
@@ -23,7 +24,7 @@ class Fighter {
         
         this.state = 'idle';
         this.isFacingRight = true;
-        this.onGround = false;
+        this.onGround = true; // 修复：角色初始时应该在地面上
         this.hasHit = false;
         
         this.animations = {};
@@ -118,6 +119,17 @@ class Fighter {
     }
     
     update(deltaTime, input) {
+        // 调试输出：Player B的update方法调用
+        if (this.id === 'playerB') {
+            console.log('🔥 PlayerB - update() called', {
+                input: input,
+                state: this.state,
+                position: { x: this.x, y: this.y },
+                onGround: this.onGround,
+                deltaTime: deltaTime
+            });
+        }
+        
         this.handleInput(input);
         this.updatePhysics(deltaTime);
         this.updateAnimations(deltaTime);
@@ -130,14 +142,21 @@ class Fighter {
     handleInput(input) {
         if (this.state === 'hitstun' || this.state === 'knockdown') return;
         
+        // 调试输出：打印所有输入状态
+        if ((input.left || input.right || input.jump || input.crouch) && (this.id === 'playerB')) {
+            console.log('PlayerB handleInput called:', input, 'State:', this.state, 'Position:', this.x, this.y);
+        }
+        
         const speed = this.speed * (input.crouch ? 0.5 : 1);
         
         if (input.left && !input.right) {
             this.vx = -speed * 300;
             this.state = this.onGround ? 'walk' : 'air';
+            console.log('PlayerB moving left, vx:', this.vx);
         } else if (input.right && !input.left) {
             this.vx = speed * 300;
             this.state = this.onGround ? 'walk' : 'air';
+            console.log('PlayerB moving right, vx:', this.vx);
         } else {
             this.vx = 0;
             if (this.onGround && this.state !== 'attack' && this.state !== 'hitstun') {
@@ -149,6 +168,7 @@ class Fighter {
             this.vy = -400;
             this.onGround = false;
             this.state = 'jump';
+            console.log('PlayerB jumping');
             if (window.game && window.game.audioSystem) {
                 window.game.audioSystem.playSound('jump');
             }
@@ -156,6 +176,7 @@ class Fighter {
         
         if (input.crouch && this.onGround && this.state !== 'attack') {
             this.state = 'crouch';
+            console.log('PlayerB crouching');
         }
         
         this.handleAttacks(input);
@@ -164,21 +185,40 @@ class Fighter {
     handleAttacks(input) {
         if (this.state === 'hitstun' || this.state === 'knockdown') return;
         
+        // 调试输出：Player B攻击输入检测
+        if (this.id === 'playerB' && (input.lightAttackDown || input.heavyAttackDown || input.specialDown || input.ultimateDown || input.superDown)) {
+            console.log('PlayerB handleAttacks called:', {
+                lightAttack: input.lightAttack,
+                heavyAttack: input.heavyAttack,
+                special: input.special,
+                ultimate: input.ultimate,
+                super: input.super,
+                canAttack: this.canAttack(),
+                currentState: this.state,
+                energy: this.energy
+            });
+        }
+        
         if (input.lightAttack && this.canAttack()) {
+            console.log('PlayerB starting light attack');
             this.startAttack('light');
         } else if (input.heavyAttack && this.canAttack()) {
+            console.log('PlayerB starting heavy attack');
             this.startAttack('heavy');
         } else if (input.special && this.canAttack() && this.energy >= this.attackData.special.energyCost) {
+            console.log('PlayerB starting special attack');
             this.startAttack('special');
         } else if (input.ultimate && this.canAttack() && this.energy >= this.attackData.ultimate.energyCost) {
+            console.log('PlayerB starting ultimate attack');
             this.startAttack('ultimate');
         } else if (input.super && this.canAttack() && this.energy >= this.attackData.super.energyCost) {
+            console.log('PlayerB starting super attack');
             this.startAttack('super');
         }
     }
     
     canAttack() {
-        return this.state !== 'attack' && this.state !== 'hitstun' && this.state !== 'knockdown' && this.onGround;
+        return this.state !== 'attack' && this.state !== 'hitstun' && this.state !== 'knockdown';
     }
     
     startAttack(attackType) {
@@ -223,56 +263,87 @@ class Fighter {
     }
     
     executeSpecialAttack(attackType) {
-        switch (attackType) {
-            case 'special':
-                if (this.characterType === 'fireWarrior') {
-                    this.createFireball();
-                } else if (this.characterType === 'thunderMage') {
-                    this.createLightningChain();
-                } else if (this.characterType === 'iceKnight') {
-                    this.createIceWall();
-                } else if (this.characterType === 'windNinja') {
-                    this.createTornado();
-                } else if (this.characterType === 'rockGiant') {
-                    this.createRockShield();
-                } else if (this.characterType === 'shadowAssassin') {
-                    this.createInvisibility();
-                }
-                break;
-                
-            case 'ultimate':
-                if (this.characterType === 'fireWarrior') {
-                    this.createFireDragon();
-                } else if (this.characterType === 'thunderMage') {
-                    this.createThunderStorm();
-                } else if (this.characterType === 'iceKnight') {
-                    this.createFreezeField();
-                } else if (this.characterType === 'windNinja') {
-                    this.createWindSlash();
-                } else if (this.characterType === 'rockGiant') {
-                    this.createEarthquake();
-                } else if (this.characterType === 'shadowAssassin') {
-                    this.createShadowStrike();
-                }
-                break;
-                
-            case 'super':
-                if (this.characterType === 'fireWarrior') {
-                    this.createPhoenixRising();
-                } else if (this.characterType === 'thunderMage') {
-                    this.createThunderGod();
-                } else if (this.characterType === 'iceKnight') {
-                    this.createAbsoluteZero();
-                } else if (this.characterType === 'windNinja') {
-                    this.createWindGod();
-                } else if (this.characterType === 'rockGiant') {
-                    this.createMountainCrush();
-                } else if (this.characterType === 'shadowAssassin') {
-                    this.createShadowStorm();
-                }
-                break;
+            // 为特殊攻击添加实际的战斗效果
+            switch (attackType) {
+                case 'special':
+                    if (this.characterType === 'fireWarrior') {
+                        this.createFireball();
+                        this.createFireball(); // 双发效果
+                    } else if (this.characterType === 'thunderMage') {
+                        this.createLightningChain();
+                        this.energy += 10; // 雷电法师技能回复能量
+                    } else if (this.characterType === 'iceKnight') {
+                        this.createIceWall();
+                        this.invulnerable = true; // 短暂无敌
+                        this.invulnerableTimer = 1000;
+                    } else if (this.characterType === 'windNinja') {
+                        this.createTornado();
+                        this.speed *= 1.5; // 暂时提升速度
+                        setTimeout(() => { this.speed /= 1.5; }, 2000);
+                    } else if (this.characterType === 'rockGiant') {
+                        this.createRockShield();
+                        this.defense += 0.2; // 暂时提升防御
+                        setTimeout(() => { this.defense -= 0.2; }, 3000);
+                    } else if (this.characterType === 'shadowAssassin') {
+                        this.createInvisibility();
+                        this.speed *= 2; // 隐身时速度翻倍
+                        setTimeout(() => { this.speed /= 2; }, 3000);
+                    }
+                    break;
+                    
+                case 'ultimate':
+                    if (this.characterType === 'fireWarrior') {
+                        this.createFireDragon();
+                        this.createFireDragon(); // 多条火龙
+                        this.createFireDragon();
+                    } else if (this.characterType === 'thunderMage') {
+                        this.createThunderStorm();
+                        this.energy = this.maxEnergy; // 满能量
+                    } else if (this.characterType === 'iceKnight') {
+                        this.createFreezeField();
+                        this.createFreezeField(); // 范围冻结
+                    } else if (this.characterType === 'windNinja') {
+                        this.createWindSlash();
+                        this.createWindSlash();
+                        this.createWindSlash();
+                    } else if (this.characterType === 'rockGiant') {
+                        this.createEarthquake();
+                        this.vy = -300; // 地震时跳跃
+                    } else if (this.characterType === 'shadowAssassin') {
+                        this.createShadowStrike();
+                        this.createShadowStrike();
+                    }
+                    break;
+                    
+                case 'super':
+                    if (this.characterType === 'fireWarrior') {
+                        this.createPhoenixRising();
+                        this.hp = Math.min(this.hp + 200, this.maxHp); // 治疗
+                    } else if (this.characterType === 'thunderMage') {
+                        this.createThunderGod();
+                        this.energy = this.maxEnergy; // 满能量
+                        this.attack *= 1.5; // 攻击力提升
+                        setTimeout(() => { this.attack /= 1.5; }, 5000);
+                    } else if (this.characterType === 'iceKnight') {
+                        this.createAbsoluteZero();
+                        this.invulnerable = true;
+                        this.invulnerableTimer = 3000;
+                    } else if (this.characterType === 'windNinja') {
+                        this.createWindGod();
+                        this.speed *= 3;
+                        setTimeout(() => { this.speed /= 3; }, 4000);
+                    } else if (this.characterType === 'rockGiant') {
+                        this.createMountainCrush();
+                        this.defense *= 2;
+                        setTimeout(() => { this.defense /= 2; }, 5000);
+                    } else if (this.characterType === 'shadowAssassin') {
+                        this.createShadowStorm();
+                        this.attack *= 2;
+                        setTimeout(() => { this.attack /= 2; }, 6000);
+                    }
+                    break;
+            }
         }
-    }
     
     updatePhysics(deltaTime) {
         this.vy += 800 * (deltaTime / 1000);
@@ -397,8 +468,9 @@ class Fighter {
         this.vx = 0;
         this.vy = 0;
         this.hp = this.maxHp;
-        this.energy = 0;
+        this.energy = 50; // 修复：重置时保持初始能量
         this.state = 'idle';
+        this.onGround = true; // 修复：重置时在地面上
         this.currentAttack = null;
         this.attackTimer = 0;
         this.hasHit = false;
@@ -565,6 +637,17 @@ class Fighter {
     }
     
     renderCharacterDetails(ctx, characterColor, skinColor) {
+        // 玩家标识符 - 显示"A"或"B"
+        const playerLabel = this.name === 'playerA' ? 'A' : 'B';
+        const labelColor = this.name === 'playerA' ? '#ff4444' : '#4444ff';
+        
+        // 在角色头部上方显示标识符
+        ctx.fillStyle = labelColor;
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(playerLabel, 25, this.height - 100);
+        
         // 根据角色类型添加特殊细节
         if (this.characterType === 'iceKnight') {
             // 冰霜效果
